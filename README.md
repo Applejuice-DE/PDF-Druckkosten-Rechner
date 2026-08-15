@@ -10,6 +10,8 @@ Die Daten werden lokal im Browser ermittelt, es erfolgt kein Upload auf externe 
 Bitte beachten: Ich bin davon ausgegangen, dass die meisten Drucker im Farbdruck das schwarz größtenteils aus den Farbpatronen / Farbtanks mischen. Deshalb wird bei der Berechnung nicht nach SW oder Farbe unterschieden, lediglich ein anderer Preis je Normseite ist einstellbar.
 Wenn der Drucker also schwarze Tinte im Farbdruck einsetzt - und die Tintenpreise zwischen Schwarz und Farben unterschiedlich sind, kommt es deshalb zu leichten Abweichungen.
 
+Dieses Projekt wurde mithilfe von Vibe Coding und KI-gestützten Eingabeaufforderungen erstellt.
+
 #####################################################################################
 
 # PDF Printing Cost Calculator
@@ -24,8 +26,6 @@ The data is calculated locally in the browser; nothing is uploaded to external s
 Please note: I’ve assumed that most printers mix black ink primarily from the color cartridges or tanks when printing in color. Therefore, the calculation does not distinguish between black-and-white and color; only a different price per standard page can be set.
 So if the printer uses black ink in color printing—and the ink prices for black and color differ—this will result in slight variations.
 
-#####################################################################################
-
-Dieses Projekt wurde mithilfe von Vibe Coding und KI-gestützten Eingabeaufforderungen erstellt.
-
 This project was built using Vibe Coding / AI-assisted prompts.
+
+#####################################################################################
