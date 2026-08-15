@@ -27,4 +27,5 @@ So if the printer uses black ink in color printing—and the ink prices for blac
 #####################################################################################
 
 Dieses Projekt wurde mithilfe von Vibe Coding und KI-gestützten Eingabeaufforderungen erstellt.
+
 This project was built using Vibe Coding / AI-assisted prompts.
