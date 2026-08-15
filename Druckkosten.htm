@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Druckkostenrechner</title>
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+  <style>
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 2px oklch(0.2 0.01 80 / 0.06);
+      --shadow-md: 0 10px 30px oklch(0.2 0.01 80 / 0.1);
+      --color-bg: #f7f6f2;
+      --color-surface: #fbfbf9;
+      --color-surface-2: #f1eee8;
+      --color-border: #d7d2c8;
+      --color-divider: #e2ddd3;
+      --color-text: #25211b;
+      --color-text-muted: #706d66;
+      --color-primary: #01696f;
+      --color-primary-hover: #0c4e54;
+      --color-primary-highlight: #dceceb;
+      --color-success: #437a22;
+      --color-success-soft: #dde9d4;
+      --color-error: #a12c7b;
+      --color-error-soft: #ecd8e4;
+      --color-warning: #964219;
+      --color-warning-soft: #efdfd5;
+      --color-text-inverse: #f9f8f4;
+      --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+      --content-default: 1120px;
+      --font-body: 'Satoshi', 'Inter', sans-serif;
+      --font-display: 'Satoshi', 'Inter', sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --color-bg: #161513;
+      --color-surface: #1d1b18;
+      --color-surface-2: #24211d;
+      --color-border: #393630;
+      --color-divider: #2c2925;
+      --color-text: #ebe7e0;
+      --color-text-muted: #b2ada3;
+      --color-primary: #5aa8ac;
+      --color-primary-hover: #7ec0c3;
+      --color-primary-highlight: #213437;
+      --color-success: #85b963;
+      --color-success-soft: #24311d;
+      --color-error: #de7db6;
+      --color-error-soft: #382432;
+      --color-warning: #d69167;
+      --color-warning-soft: #382820;
+      --color-text-inverse: #12110f;
+      --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.25);
+      --shadow-md: 0 12px 32px oklch(0 0 0 / 0.35);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --color-bg: #161513;
+        --color-surface: #1d1b18;
+        --color-surface-2: #24211d;
+        --color-border: #393630;
+        --color-divider: #2c2925;
+        --color-text: #ebe7e0;
+        --color-text-muted: #b2ada3;
+        --color-primary: #5aa8ac;
+        --color-primary-hover: #7ec0c3;
+        --color-primary-highlight: #213437;
+        --color-success: #85b963;
+        --color-success-soft: #24311d;
+        --color-error: #de7db6;
+        --color-error-soft: #382432;
+        --color-warning: #d69167;
+        --color-warning-soft: #382820;
+        --color-text-inverse: #12110f;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: none; text-size-adjust: none; scroll-behavior: smooth; }
+    body {
+      min-height: 100dvh;
+      line-height: 1.6;
+      font-family: var(--font-body, sans-serif);
+      font-size: var(--text-base);
+      color: var(--color-text);
+      background:
+        radial-gradient(circle at top right, color-mix(in oklab, var(--color-primary) 10%, transparent), transparent 25%),
+        var(--color-bg);
+    }
+    img, canvas, svg { display: block; max-width: 100%; height: auto; }
+    input, button { font: inherit; color: inherit; }
+    button {
+      cursor: pointer;
+      border: none;
+      transition: transform var(--transition-interactive), background var(--transition-interactive), color var(--transition-interactive), border-color var(--transition-interactive), box-shadow var(--transition-interactive);
+    }
+    :focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 3px;
+      border-radius: var(--radius-sm);
+    }
+    .skip-link {
+      position: absolute; left: var(--space-4); top: -3rem; z-index: 100;
+      background: var(--color-primary); color: var(--color-text-inverse); padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md); text-decoration: none;
+    }
+    .skip-link:focus { top: var(--space-4); }
+
+    .shell {
+      width: min(calc(100% - 2rem), var(--content-default));
+      margin: 0 auto;
+      padding: var(--space-6) 0 var(--space-12);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-8);
+      padding: var(--space-4) 0;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-3);
+      text-decoration: none;
+      color: inherit;
+      font-size: var(--text-sm);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-mark {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--color-primary-highlight), color-mix(in oklab, var(--color-primary) 20%, var(--color-surface)));
+      color: var(--color-primary);
+      display: grid;
+      place-items: center;
+      border: 1px solid color-mix(in oklab, var(--color-primary) 20%, var(--color-border));
+      box-shadow: var(--shadow-sm);
+    }
+
+    .icon-button {
+      min-width: 44px;
+      min-height: 44px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: var(--radius-full);
+      border: 1px solid color-mix(in oklab, var(--color-text) 10%, transparent);
+      background: var(--color-surface);
+      box-shadow: var(--shadow-sm);
+    }
+    .icon-button:hover { transform: translateY(-1px); }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: var(--space-6);
+      align-items: start;
+      margin-bottom: var(--space-6);
+    }
+
+    .panel {
+      background: color-mix(in oklab, var(--color-surface) 92%, var(--color-bg));
+      border: 1px solid color-mix(in oklab, var(--color-text) 10%, transparent);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+    }
+
+    .hero-card, .card, .pricing-card, .text-block {
+      padding: clamp(var(--space-5), 4vw, var(--space-8));
+    }
+
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -12% -28% auto;
+      width: 14rem;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: color-mix(in oklab, var(--color-primary) 16%, transparent);
+      filter: blur(12px);
+      z-index: -1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      margin-bottom: var(--space-4);
+      border-radius: var(--radius-full);
+      background: var(--color-primary-highlight);
+      color: var(--color-primary);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-family: var(--font-display, sans-serif);
+      font-size: var(--text-xl);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin-bottom: var(--space-4);
+      max-width: 18ch;
+    }
+
+    .section-title {
+      font-size: var(--text-lg);
+      line-height: 1.2;
+      margin-bottom: var(--space-2);
+    }
+
+    .lead, .muted { color: var(--color-text-muted); }
+    .lead { max-width: 58ch; margin-bottom: var(--space-6); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-3);
+    }
+
+    .stat {
+      padding: var(--space-4);
+      border-radius: var(--radius-lg);
+      background: color-mix(in oklab, var(--color-surface-2) 70%, transparent);
+      border: 1px solid color-mix(in oklab, var(--color-text) 8%, transparent);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: var(--text-lg);
+      font-variant-numeric: tabular-nums lining-nums;
+      margin-bottom: var(--space-1);
+    }
+
+    .stat span {
+      color: var(--color-text-muted);
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .pricing-card, .stack {
+      display: grid;
+      gap: var(--space-4);
+      align-content: start;
+    }
+
+    .price-grid, .text-grid {
+      display: grid;
+      gap: var(--space-4);
+    }
+
+    .field {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .field label {
+      font-size: var(--text-sm);
+      font-weight: 700;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-suffix {
+      position: absolute;
+      right: var(--space-4);
+      color: var(--color-text-muted);
+      pointer-events: none;
+      font-size: var(--text-sm);
+    }
+
+    .field input[type="number"],
+    .field input[type="file"] {
+      width: 100%;
+      min-height: 48px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      padding: var(--space-3) var(--space-4);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+
+    .field input[type="number"] {
+      padding-right: 3.4rem;
+      font-variant-numeric: tabular-nums lining-nums;
+    }
+
+    .field input::file-selector-button {
+      margin-right: var(--space-4);
+      border: none;
+      border-radius: var(--radius-md);
+      padding: var(--space-2) var(--space-3);
+      background: var(--color-primary-highlight);
+      color: var(--color-primary);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-full);
+      background: color-mix(in oklab, var(--color-success-soft) 70%, var(--color-surface));
+      color: var(--color-success);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .actions {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      min-height: 48px;
+      padding: 0 var(--space-5);
+      border-radius: var(--radius-lg);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: var(--color-text-inverse);
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-primary:hover { background: var(--color-primary-hover); transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+    }
+    .btn-secondary:hover { background: color-mix(in oklab, var(--color-surface-2) 65%, var(--color-primary-highlight)); }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-6);
+      align-items: start;
+    }
+
+    .status {
+      margin-top: var(--space-4);
+      padding: var(--space-4);
+      border-radius: var(--radius-lg);
+      font-size: var(--text-sm);
+      border: 1px solid transparent;
+    }
+
+    .status.info {
+      background: var(--color-primary-highlight);
+      color: var(--color-primary);
+      border-color: color-mix(in oklab, var(--color-primary) 24%, transparent);
+    }
+    .status.success {
+      background: var(--color-success-soft);
+      color: var(--color-success);
+      border-color: color-mix(in oklab, var(--color-success) 26%, transparent);
+    }
+    .status.error {
+      background: var(--color-error-soft);
+      color: var(--color-error);
+      border-color: color-mix(in oklab, var(--color-error) 26%, transparent);
+    }
+    .status.warning {
+      background: var(--color-warning-soft);
+      color: var(--color-warning);
+      border-color: color-mix(in oklab, var(--color-warning) 26%, transparent);
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-4);
+      margin-top: var(--space-5);
+    }
+
+    .result-box {
+      padding: var(--space-5);
+      border-radius: var(--radius-lg);
+      background: color-mix(in oklab, var(--color-surface-2) 70%, transparent);
+      border: 1px solid color-mix(in oklab, var(--color-text) 8%, transparent);
+    }
+
+    .result-box .label {
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-2);
+      display: block;
+    }
+
+    .result-box .value {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      line-height: 1;
+      font-variant-numeric: tabular-nums lining-nums;
+      margin-bottom: var(--space-2);
+    }
+
+    .summary-list {
+      display: grid;
+      gap: var(--space-3);
+      margin-top: var(--space-4);
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-4);
+      padding-bottom: var(--space-3);
+      border-bottom: 1px solid var(--color-divider);
+      font-size: var(--text-sm);
+    }
+
+    .summary-item:last-child {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .summary-item strong,
+    .summary-item span:last-child {
+      font-variant-numeric: tabular-nums lining-nums;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border-radius: var(--radius-lg);
+      border: 1px solid color-mix(in oklab, var(--color-text) 10%, transparent);
+      background: var(--color-surface);
+      margin-top: var(--space-5);
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      padding: var(--space-3) var(--space-4);
+      text-align: left;
+      border-bottom: 1px solid var(--color-divider);
+      font-size: var(--text-sm);
+      vertical-align: top;
+      font-variant-numeric: tabular-nums lining-nums;
+      white-space: nowrap;
+    }
+    td:nth-child(n+2) { white-space: normal; }
+    th {
+      position: sticky;
+      top: 0;
+      background: color-mix(in oklab, var(--color-surface-2) 75%, var(--color-surface));
+      z-index: 1;
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .text-block p + p,
+    .text-block ul { margin-top: var(--space-3); }
+    .text-block ul { padding-left: 1.1rem; color: var(--color-text-muted); }
+    .text-block li + li { margin-top: var(--space-2); }
+
+    .footer-note {
+      margin-top: var(--space-4);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+
+    @media (max-width: 980px) {
+      .hero { grid-template-columns: 1fr; }
+      .pricing-card { order: -1; }
+    }
+
+    @media (max-width: 640px) {
+      .shell { width: min(calc(100% - 1rem), var(--content-default)); padding-top: var(--space-4); }
+      .header { margin-bottom: var(--space-6); }
+      .stats, .results-grid { grid-template-columns: 1fr; }
+      .summary-item { flex-direction: column; gap: var(--space-1); }
+      h1 { max-width: 12ch; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Zum Inhalt springen</a>
+  <div class="shell">
+    <header class="header" aria-label="Kopfbereich">
+      <a class="brand" href="#top" aria-label="PDF Druckkostenrechner Startseite">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="9" y="7" width="20" height="28" rx="4"></rect>
+            <path d="M29 15h10v20a6 6 0 0 1-6 6H19"></path>
+            <path d="M15 18h8"></path>
+            <path d="M15 24h8"></path>
+            <path d="M15 30h5"></path>
+          </svg>
+        </span>
+        <span>PDF Druckkostenrechner</span>
+      </a>
+      <button class="icon-button" type="button" data-theme-toggle aria-label="Zu Dunkelmodus wechseln" title="Farbschema wechseln">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </header>
+
+    <main id="main" class="stack">
+      <section class="hero">
+        <div class="panel hero-card">
+          <div class="eyebrow">PDF · Fläche · Druckarten</div>
+          <h1>Druckkosten für S/W-Druck und Farbdruck getrennt berechnen</h1>
+          <p class="lead">Die Webapp ermittelt das Seitenformat jeder PDF-Seite, rechnet dessen Fläche relativ zu DIN A4 um und trennt anschließend die geschätzte Schwarz- und Farbanteile. Daraus werden zwei Gesamtsummen gebildet: einmal für reinen S/W-Druck und einmal für Farbdruck, jeweils auf Basis der gesamten Deckung pro Seite.</p>
+          <div class="stats" aria-label="Funktionsübersicht">
+            <article class="stat">
+              <strong id="stat-pages">0</strong>
+              <span>Analysierte Seiten</span>
+            </article>
+            <article class="stat">
+              <strong id="stat-coverage">0,00 %</strong>
+              <span>Ø Gesamtabdeckung</span>
+            </article>
+            <article class="stat">
+              <strong id="stat-bw-total">0,00 €</strong>
+              <span>Druckkosten S/W</span>
+            </article>
+            <article class="stat">
+              <strong id="stat-color-total">0,00 €</strong>
+              <span>Druckkosten Farbe</span>
+            </article>
+          </div>
+        </div>
+
+        <aside class="panel pricing-card" aria-labelledby="preis-heading">
+          <div>
+            <h2 id="preis-heading" class="section-title">Normpreise in Cent</h2>
+            <p class="muted">Bitte den Preis je DIN-A4-Seite mit standardisierter 5%-Deckung eingeben. Für S/W-Druck und Farbdruck wird jeweils genau ein eigener Tarif verwendet; beide Tarife beziehen sich auf die gesamte Seitendeckung.</p>
+          </div>
+          <div class="price-grid">
+            <div class="field">
+              <label for="bwPrice">S/W-Preis pro DIN-A4-Seite mit 5% Deckung</label>
+              <div class="input-wrap">
+                <input id="bwPrice" name="bwPrice" type="number" min="0" step="0.1" value="3.0" inputmode="decimal" />
+                <span class="input-suffix">Cent</span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="colorPrice">Farbdruck-Preis pro DIN-A4-Seite mit 5% Deckung</label>
+              <div class="input-wrap">
+                <input id="colorPrice" name="colorPrice" type="number" min="0" step="0.1" value="4.0" inputmode="decimal" />
+                <span class="input-suffix">Cent</span>
+              </div>
+            </div>
+          </div>
+          <div class="pill">Normbasis: DIN A4 · 5% Deckung · flächenbasiert</div>
+        </aside>
+      </section>
+
+      <section class="layout">
+        <section class="panel card" aria-labelledby="upload-heading">
+          <h2 id="upload-heading" class="section-title">PDF analysieren</h2>
+          <p class="muted">Die PDF wird lokal im Browser gerendert. Für jede Seite wird die reale Fläche bestimmt und relativ zu DIN A4 skaliert, damit Normpreise auch für A3, A5 oder Sonderformate umgerechnet werden können.</p>
+          <div class="field" style="margin-top: var(--space-5);">
+            <label for="pdfFile">PDF-Datei auswählen</label>
+            <input id="pdfFile" name="pdfFile" type="file" accept="application/pdf" />
+          </div>
+          <div class="actions" style="margin-top: var(--space-5);">
+            <button id="analyzeBtn" class="btn btn-primary" type="button">PDF analysieren</button>
+            <button id="demoBtn" class="btn btn-secondary" type="button">Beispiel laden</button>
+          </div>
+          <div id="statusBox" class="status info" role="status" aria-live="polite">Wähle eine PDF-Datei oder lade das Beispiel mit Formatfaktor, S/W-Druck und Farbdruck.</div>
+          <p class="footer-note">Hinweis: Die Farbtrennung ist eine technische Schätzung aus gerenderten Pixeln. Die Preisumrechnung erfolgt zusätzlich über den Seitenflächenfaktor relativ zu DIN A4.</p>
+        </section>
+
+        <section class="panel card" aria-labelledby="result-heading">
+          <h2 id="result-heading" class="section-title">Ergebnis</h2>
+          <p class="muted">Die App bildet zwei Vergleichswerte: S/W-Druck berechnet die gesamte Deckung einer Seite zum S/W-Tarif, Farbdruck berechnet dieselbe gesamte Deckung der Seite zum Farbdruck-Tarif.</p>
+          <div class="results-grid" aria-label="Gesamtkosten">
+            <article class="result-box">
+              <span class="label">Gesamt S/W-Druck</span>
+              <div id="bwTotal" class="value">0,00 €</div>
+              <p id="bwMeta">Noch keine Analyse.</p>
+            </article>
+            <article class="result-box">
+              <span class="label">Gesamt Farbdruck</span>
+              <div id="colorTotal" class="value">0,00 €</div>
+              <p id="colorMeta">Noch keine Analyse.</p>
+            </article>
+          </div>
+          <div id="summaryList" class="summary-list" aria-label="Analyseübersicht"></div>
+      <div class="actions" style="margin-top: var(--space-5);">
+        <button id="exportBtn" class="btn btn-secondary" type="button">EXPORT</button>
+      </div>
+          <div class="table-wrap">
+            <table aria-describedby="result-heading">
+              <thead>
+                <tr>
+                  <th scope="col">Seite</th>
+                  <th scope="col">Format</th>
+                  <th scope="col">Flächenfaktor</th>
+                  <th scope="col">Schwarz</th>
+                  <th scope="col">Farbe</th>
+                  <th scope="col">Gesamt</th>
+                  <th scope="col">S/W-Druck</th>
+                  <th scope="col">Farbdruck</th>
+                </tr>
+              </thead>
+              <tbody id="resultsBody">
+                <tr>
+                  <td colspan="8">Noch keine Seiten analysiert.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel text-block" aria-labelledby="hinweise-heading">
+          <h2 id="hinweise-heading" class="section-title">Beschreibung</h2>
+          <div class="text-grid">
+            <p class="muted">Rechenlogik: Beim S/W-Druck wird die gesamte Deckung einer Seite angesetzt, also Schwarzanteil plus Farbanteil. Beim Farbdruck gilt ebenfalls die gesamte Deckung einer Seite, allerdings mit einem eigenen Farbdruck-Tarif, da Schwarz dort über die Farben erzeugt wird.</p>
+            <p class="muted">Formatlogik: Der eingegebene Normpreis gilt immer für DIN A4 bei 5% Deckung. Andere Formate werden über die Seitenfläche relativ zu DIN A4 skaliert, sodass zum Beispiel ein doppelt so großes Format bei gleicher Deckung den doppelten Normpreis erzeugt.</p>
+            <ul>
+              <li>Schätzung des Schwarzanteils über nahezu neutrale dunkle Pixel (nur zur Information in der Analyseansicht).</li>
+              <li>Schätzung des Farbanteils über Differenzen zwischen den RGB-Kanälen (nur zur Information in der Analyseansicht).</li>
+              <li>Lokale Verarbeitung im Browser, ohne Upload an einen Server.</li>
+            </ul>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.mjs';
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.worker.min.mjs';
+
+    const MM_PER_POINT = 25.4 / 72;
+    const A4_WIDTH_MM = 210;
+    const A4_HEIGHT_MM = 297;
+    const A4_AREA_MM2 = A4_WIDTH_MM * A4_HEIGHT_MM;
+
+    const state = {
+      currentTheme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+      lastResult: null,
+      busy: false
+    };
+
+    const elements = {
+      themeToggle: document.querySelector('[data-theme-toggle]'),
+      fileInput: document.getElementById('pdfFile'),
+      analyzeBtn: document.getElementById('analyzeBtn'),
+      demoBtn: document.getElementById('demoBtn'),
+      bwPrice: document.getElementById('bwPrice'),
+      colorPrice: document.getElementById('colorPrice'),
+      statusBox: document.getElementById('statusBox'),
+      resultsBody: document.getElementById('resultsBody'),
+      bwTotal: document.getElementById('bwTotal'),
+      colorTotal: document.getElementById('colorTotal'),
+      bwMeta: document.getElementById('bwMeta'),
+      colorMeta: document.getElementById('colorMeta'),
+      summaryList: document.getElementById('summaryList'),
+      statPages: document.getElementById('stat-pages'),
+      statCoverage: document.getElementById('stat-coverage'),
+      statBwTotal: document.getElementById('stat-bw-total'),
+      statColorTotal: document.getElementById('stat-color-total')
+    };
+
+    function setTheme(theme) {
+      state.currentTheme = theme;
+      document.documentElement.setAttribute('data-theme', theme);
+      const isDark = theme === 'dark';
+      elements.themeToggle.setAttribute('aria-label', isDark ? 'Zu Hellmodus wechseln' : 'Zu Dunkelmodus wechseln');
+      elements.themeToggle.innerHTML = isDark
+        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>'
+        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+    }
+
+    function parseDecimalInput(value) {
+      const normalized = String(value).replace(',', '.');
+      const parsed = Number(normalized);
+      return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+    }
+
+    function parsePriceCent(input) {
+      return parseDecimalInput(input.value);
+    }
+
+    function centToEuro(cent) {
+      return (cent || 0) / 100;
+    }
+
+    function formatEuro(value) {
+      return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value || 0);
+    }
+
+    function formatCent(value) {
+      return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value || 0) + ' Cent';
+    }
+
+    function formatPercent(value) {
+      return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value || 0) + ' %';
+    }
+
+    function formatMm(value) {
+      return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value || 0) + ' mm';
+    }
+
+    function formatFactor(value) {
+      return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value || 0) + '×';
+    }
+
+    function setStatus(message, type = 'info') {
+      elements.statusBox.className = `status ${type}`;
+      elements.statusBox.textContent = message;
+    }
+
+    function updateDerivedCosts() {
+      if (!state.lastResult) return;
+      renderResults(state.lastResult.pages, true);
+    }
+
+    function pageAreaFactor(widthMm, heightMm) {
+      const area = widthMm * heightMm;
+      return area / A4_AREA_MM2;
+    }
+
+    function classifyPageSize(viewport) {
+      const widthMm = viewport.width * MM_PER_POINT;
+      const heightMm = viewport.height * MM_PER_POINT;
+      return {
+        widthMm,
+        heightMm,
+        areaFactor: pageAreaFactor(widthMm, heightMm),
+        label: `${formatMm(widthMm)} × ${formatMm(heightMm)}`
+      };
+    }
+
+    function createCanvas(viewport) {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d', { willReadFrequently: true, alpha: false });
+      const outputScale = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.max(1, Math.floor(viewport.width * outputScale));
+      canvas.height = Math.max(1, Math.floor(viewport.height * outputScale));
+      canvas.style.width = `${viewport.width}px`;
+      canvas.style.height = `${viewport.height}px`;
+      context.setTransform(outputScale, 0, 0, outputScale, 0, 0);
+      context.fillStyle = '#ffffff';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      return { canvas, context };
+    }
+
+    function estimateCoverageSplit(imageData) {
+      const data = imageData.data;
+      const totalPixels = data.length / 4;
+      let blackCoverage = 0;
+      let colorCoverage = 0;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        const darkness = Math.max(0, (255 - luminance) / 255);
+        if (darkness <= 0.03) continue;
+
+        const spread = Math.max(r, g, b) - Math.min(r, g, b);
+        const saturationFactor = Math.min(1, spread / 90);
+        const colorShare = saturationFactor * darkness;
+        const blackShare = Math.max(0, darkness - colorShare);
+
+        colorCoverage += colorShare;
+        blackCoverage += blackShare;
+      }
+
+      const blackPercent = totalPixels ? (blackCoverage / totalPixels) * 100 : 0;
+      const colorPercent = totalPixels ? (colorCoverage / totalPixels) * 100 : 0;
+      const totalPercent = blackPercent + colorPercent;
+
+      return {
+        blackPercent: Math.max(0, Math.min(blackPercent, 100)),
+        colorPercent: Math.max(0, Math.min(colorPercent, 100)),
+        totalPercent: Math.max(0, Math.min(totalPercent, 100))
+      };
+    }
+
+    function renderResults(pageRows, keepStatus = false) {
+      const bwPriceCent = parsePriceCent(elements.bwPrice);
+      const colorPriceCent = parsePriceCent(elements.colorPrice);
+
+      const rows = pageRows.map((page, index) => {
+        const bwPrintCostCent = (page.totalPercent / 5) * bwPriceCent * page.areaFactor;
+        const colorPrintCostCent = (page.totalPercent / 5) * colorPriceCent * page.areaFactor;
+        return {
+          page: index + 1,
+          sizeLabel: page.sizeLabel,
+          areaFactor: page.areaFactor,
+          blackPercent: page.blackPercent,
+          colorPercent: page.colorPercent,
+          totalPercent: page.totalPercent,
+          bwPrintCostCent,
+          colorPrintCostCent
+        };
+      });
+
+      const bwTotalCent = rows.reduce((sum, row) => sum + row.bwPrintCostCent, 0);
+      const colorTotalCent = rows.reduce((sum, row) => sum + row.colorPrintCostCent, 0);
+      const totalEuro = centToEuro(bwTotalCent + colorTotalCent);
+      const avgCoverage = rows.length ? rows.reduce((sum, row) => sum + row.totalPercent, 0) / rows.length : 0;
+      const avgBlack = rows.length ? rows.reduce((sum, row) => sum + row.blackPercent, 0) / rows.length : 0;
+      const avgColor = rows.length ? rows.reduce((sum, row) => sum + row.colorPercent, 0) / rows.length : 0;
+      const avgAreaFactor = rows.length ? rows.reduce((sum, row) => sum + row.areaFactor, 0) / rows.length : 0;
+
+      elements.resultsBody.innerHTML = rows.length
+        ? rows.map((row) => `
+            <tr>
+              <td>Seite ${row.page}</td>
+              <td>${row.sizeLabel}</td>
+              <td>${formatFactor(row.areaFactor)}</td>
+              <td>${formatPercent(row.blackPercent)}</td>
+              <td>${formatPercent(row.colorPercent)}</td>
+              <td>${formatPercent(row.totalPercent)}</td>
+              <td>${formatEuro(centToEuro(row.bwPrintCostCent))}</td>
+              <td>${formatEuro(centToEuro(row.colorPrintCostCent))}</td>
+            </tr>
+          `).join('')
+        : '<tr><td colspan="8">Noch keine Seiten analysiert.</td></tr>';
+
+      elements.bwTotal.textContent = formatEuro(centToEuro(bwTotalCent));
+      elements.colorTotal.textContent = formatEuro(centToEuro(colorTotalCent));
+      elements.bwMeta.textContent = `${rows.length} Seite(n), gesamte Deckung zum S/W-Tarif ${formatCent(bwPriceCent)} je 5%-A4-Seite.`;
+      elements.colorMeta.textContent = `${rows.length} Seite(n), gesamte Deckung zum Farbdruck-Tarif ${formatCent(colorPriceCent)} je 5%-A4-Seite.`;
+      elements.statPages.textContent = String(rows.length);
+      elements.statCoverage.textContent = formatPercent(avgCoverage);
+      elements.statBwTotal.textContent = formatEuro(centToEuro(bwTotalCent));
+      elements.statColorTotal.textContent = formatEuro(centToEuro(colorTotalCent));
+      elements.summaryList.innerHTML = `
+        <div class="summary-item"><strong>Seitenanzahl</strong><span>${rows.length}</span></div>
+        <div class="summary-item"><strong>Ø Flächenfaktor</strong><span>${formatFactor(avgAreaFactor)}</span></div>
+        <div class="summary-item"><strong>Ø Schwarzdeckung</strong><span>${formatPercent(avgBlack)}</span></div>
+        <div class="summary-item"><strong>Ø Farbdeckung</strong><span>${formatPercent(avgColor)}</span></div>
+        <div class="summary-item"><strong>Gesamt S/W-Druck</strong><span>${formatEuro(centToEuro(bwTotalCent))}</span></div>
+        <div class="summary-item"><strong>Gesamt Farbdruck</strong><span>${formatEuro(centToEuro(colorTotalCent))}</span></div>
+      `;
+
+      state.lastResult = { pages: pageRows, bwTotalCent, colorTotalCent, avgCoverage };
+      if (!keepStatus) {
+        setStatus(`Analyse abgeschlossen: ${rows.length} Seite(n) für S/W-Druck und Farbdruck mit je einem Tarif ausgewertet.`, 'success');
+      }
+    }
+
+    async function analyzePdf(arrayBuffer) {
+      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      const pdf = await loadingTask.promise;
+      const pages = [];
+
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        setStatus(`Analysiere Seite ${pageNumber} von ${pdf.numPages} …`, 'info');
+        const page = await pdf.getPage(pageNumber);
+        const viewport = page.getViewport({ scale: 1 });
+        const size = classifyPageSize(viewport);
+        const renderViewport = page.getViewport({ scale: 1.8 });
+        const { canvas, context } = createCanvas(renderViewport);
+        await page.render({ canvasContext: context, viewport: renderViewport }).promise;
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const coverage = estimateCoverageSplit(imageData);
+
+        pages.push({
+          sizeLabel: size.label,
+          areaFactor: size.areaFactor,
+          blackPercent: coverage.blackPercent,
+          colorPercent: coverage.colorPercent,
+          totalPercent: coverage.totalPercent
+        });
+      }
+
+      return pages;
+    }
+
+    async function handleAnalyze() {
+      if (state.busy) return;
+      const file = elements.fileInput.files?.[0];
+      if (!file) {
+        setStatus('Bitte zuerst eine PDF-Datei auswählen.', 'warning');
+        return;
+      }
+      if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+        setStatus('Die ausgewählte Datei ist keine PDF-Datei.', 'error');
+        return;
+      }
+
+      try {
+        state.busy = true;
+        elements.analyzeBtn.disabled = true;
+        elements.analyzeBtn.textContent = 'Analyse läuft …';
+        setStatus('PDF wird geladen, Formate werden vermessen und Druckarten berechnet …', 'info');
+        const arrayBuffer = await file.arrayBuffer();
+        const pages = await analyzePdf(arrayBuffer);
+        renderResults(pages);
+      } catch (error) {
+        console.error(error);
+        elements.resultsBody.innerHTML = '<tr><td colspan="8">Keine auswertbaren Seiten vorhanden.</td></tr>';
+        elements.summaryList.innerHTML = '';
+        elements.bwTotal.textContent = '0,00 €';
+        elements.colorTotal.textContent = '0,00 €';
+        elements.bwMeta.textContent = 'Analyse abgebrochen.';
+        elements.colorMeta.textContent = 'Analyse abgebrochen.';
+        elements.statPages.textContent = '0';
+        elements.statCoverage.textContent = '0,00 %';
+        elements.statBwTotal.textContent = '0,00 €';
+        elements.statColorTotal.textContent = '0,00 €';
+        state.lastResult = null;
+        setStatus(error?.message || 'Die PDF konnte nicht analysiert werden.', 'error');
+      } finally {
+        state.busy = false;
+        elements.analyzeBtn.disabled = false;
+        elements.analyzeBtn.textContent = 'PDF analysieren';
+      }
+    }
+
+    function loadDemo() {
+      const pages = [
+        { sizeLabel: '210,0 mm × 297,0 mm', areaFactor: 1, blackPercent: 5, colorPercent: 0, totalPercent: 5 },
+        { sizeLabel: '297,0 mm × 420,0 mm', areaFactor: 2, blackPercent: 5, colorPercent: 5, totalPercent: 10 }
+      ];
+      renderResults(pages);
+      setStatus('Beispiel geladen: DIN A4 und DIN A3 mit korrektem Flächenfaktor und je einem Tarif für S/W-Druck und Farbdruck.', 'success');
+    }
+
+    elements.themeToggle.addEventListener('click', () => {
+      setTheme(state.currentTheme === 'dark' ? 'light' : 'dark');
+    });
+
+    elements.analyzeBtn.addEventListener('click', handleAnalyze);
+    elements.demoBtn.addEventListener('click', loadDemo);
+    elements.bwPrice.addEventListener('input', updateDerivedCosts);
+    elements.colorPrice.addEventListener('input', updateDerivedCosts);
+    elements.fileInput.addEventListener('change', () => {
+      const file = elements.fileInput.files?.[0];
+      if (file) {
+        setStatus(`Datei gewählt: ${file.name}`, 'info');
+      }
+    });
+
+    const exportBtn = document.getElementById('exportBtn');
+    exportBtn.addEventListener('click', () => {
+      const rows = state.lastResult?.pages ?? [];
+      const bwPriceCent = parsePriceCent(elements.bwPrice);
+      const colorPriceCent = parsePriceCent(elements.colorPrice);
+      const csvRows = [
+        ['Seite', 'Format', 'Flächenfaktor', 'Schwarz', 'Farbe', 'Gesamt', 'S/W-Druck', 'Farbdruck'],
+        ...rows.map((page, index) => [
+          `Seite ${index + 1}`,
+          page.sizeLabel,
+          formatFactor(page.areaFactor),
+          formatPercent(page.blackPercent),
+          formatPercent(page.colorPercent),
+          formatPercent(page.totalPercent),
+          formatEuro(centToEuro((page.totalPercent / 5) * bwPriceCent * page.areaFactor)),
+          formatEuro(centToEuro((page.totalPercent / 5) * colorPriceCent * page.areaFactor))
+        ]),
+        ['', '', '', '', '', '', formatEuro(centToEuro(rows.reduce((sum, page) => sum + (page.totalPercent / 5) * bwPriceCent * page.areaFactor, 0))), formatEuro(centToEuro(rows.reduce((sum, page) => sum + (page.totalPercent / 5) * colorPriceCent * page.areaFactor, 0)))]
+      ];
+      const csv = csvRows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'druckkosten_export.csv';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+
+    setTheme(state.currentTheme);
+    loadDemo();
+  </script>
+</body>
+</html>
