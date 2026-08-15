@@ -12,8 +12,8 @@ Wenn der Drucker also schwarze Tinte im Farbdruck einsetzt - und die Tintenpreis
 
 Dieses Projekt wurde mithilfe von Vibe Coding und KI-gestützten Eingabeaufforderungen erstellt.
 
-<img src="https://github.com/Applejuice-DE/PDF-Druckkosten-Rechner/blob/main/Screen1.png?raw=true" width="50%"></img>
-<img src="https://github.com/Applejuice-DE/PDF-Druckkosten-Rechner/blob/main/Screen2.png?raw=true" width="50%"></img> 
+<img src="https://github.com/Applejuice-DE/PDF-Druckkosten-Rechner/blob/main/Screen1.png" width="45%"></img>
+<img src="https://github.com/Applejuice-DE/PDF-Druckkosten-Rechner/blob/main/Screen2.png" width="45%"></img> 
 
 #####################################################################################
 
