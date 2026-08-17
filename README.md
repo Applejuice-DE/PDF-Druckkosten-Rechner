@@ -1,6 +1,6 @@
 # Druckkosten-Rechner
 
-<img src="https://github.com/Applejuice-DE/PDF-Druckkosten-Rechner/blob/main/Screenshot.png" width="60%"></img>
+<img src="https://github.com/Applejuice-DE/PDF-Druckkosten-Rechner/blob/main/Screenshot_DK.png" width="60%"></img>
 
 
 Ein browserbasierter Rechner zur ungefähren Ermittlung der Druckkosten
