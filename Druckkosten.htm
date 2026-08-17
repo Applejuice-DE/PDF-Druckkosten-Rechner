@@ -1,461 +1,565 @@
 <!doctype html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Druckkosten-Rechner</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Druckkosten-Rechner</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-<style>
-:root {
-  font: 15px system-ui, sans-serif;
-  color: #172033;
-  background: #f5f7fb;
-}
+  <style>
+    :root {
+      font: 15px system-ui, sans-serif;
+      color: #172033;
+      background: #f5f7fb;
+    }
 
-body {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-}
+    body {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
 
-h1 {
-  margin-bottom: .3rem;
-}
+    h1 {
+      margin-bottom: .3rem;
+    }
 
-.card {
-  background: white;
-  border: 1px solid #dce2ee;
-  border-radius: 12px;
-  padding: 1rem;
-  margin: 1rem 0;
-  box-shadow: 0 2px 8px #17203310;
-}
+    .card {
+      background: #fff;
+      border: 1px solid #dce2ee;
+      border-radius: 12px;
+      padding: 1rem;
+      margin: 1rem 0;
+      box-shadow: 0 2px 8px #17203310;
+    }
 
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: end;
-}
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: end;
+    }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: .3rem;
-}
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: .3rem;
+    }
 
-input,
-button {
-  font: inherit;
-  padding: .55rem .7rem;
-  border: 1px solid #bbc5d8;
-  border-radius: 7px;
-}
+    input,
+    button {
+      font: inherit;
+      padding: .55rem .7rem;
+      border: 1px solid #bbc5d8;
+      border-radius: 7px;
+    }
 
-button {
-  cursor: pointer;
-  background: #1769aa;
-  color: #fff;
-  border: 0;
-}
+    button {
+      cursor: pointer;
+      background: #1769aa;
+      color: #fff;
+      border: 0;
+    }
 
-button:disabled {
-  opacity: .5;
-  cursor: not-allowed;
-}
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
 
-.hint {
-  color: #53627a;
-  font-size: .9rem;
-}
+    .hint {
+      color: #53627a;
+      font-size: .9rem;
+    }
 
-.status {
-  margin-top: .8rem;
-}
+    .status {
+      margin-top: .8rem;
+    }
 
-.table-wrap {
-  overflow: auto;
-}
+    .table-wrap {
+      overflow: auto;
+    }
 
-table {
-  border-collapse: collapse;
-  width: 100%;
-  min-width: 760px;
-}
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 760px;
+    }
 
-th,
-td {
-  padding: .55rem;
-  border-bottom: 1px solid #e5e9f1;
-  text-align: right;
-}
+    th,
+    td {
+      padding: .55rem;
+      border-bottom: 1px solid #e5e9f1;
+      text-align: right;
+    }
 
-th:first-child,
-td:first-child {
-  text-align: left;
-}
+    th:first-child,
+    td:first-child {
+      text-align: left;
+    }
 
-th {
-  background: #eef3fa;
-}
+    th {
+      background: #eef3fa;
+    }
 
-.total {
-  font-weight: 700;
-}
+    .total {
+      font-weight: 700;
+    }
 
-progress {
-  width: 100%;
-}
-</style>
+    progress {
+      width: 100%;
+    }
+  </style>
 </head>
 
 <body>
 
-<h1>Druckkosten-Rechner</h1>
+  <h1>Druckkosten-Rechner</h1>
 
-<p class="hint">
-  Näherung: PDF-Seiten werden im Browser gerastert und aus RGB in einfache
-  CMYK-Werte umgerechnet. Für verbindliche Druckpreise bitte ICC-Profile,
-  Rasterverfahren und Drucker berücksichtigen.
-</p>
+  <p class="hint">
+    Näherung: PDF-Seiten werden im Browser gerastert und aus RGB in einfache
+    CMYK-Werte umgerechnet. Für verbindliche Druckpreise bitte ICC-Profile,
+    Rasterverfahren und Drucker berücksichtigen.
+  </p>
 
-<section class="card">
-  <div class="controls">
+  <section class="card">
+    <div class="controls">
 
-    <label class="field">
-      PDF-Datei
-      <input id="file" type="file" accept="application/pdf">
-    </label>
+      <label class="field">
+        PDF-Datei
+        <input id="file" type="file" accept="application/pdf">
+      </label>
 
-    <label class="field">
-      Preis A4 bei 5% Gesamtdeckung (Cent)
-      <input
-        id="basePrice"
-        type="number"
-        min="0"
-        step="0.01"
-        value="0.9"
-      >
-    </label>
+      <label class="field">
+        Preis A4 bei 5% Gesamtdeckung (Cent)
+        <input
+          id="basePrice"
+          type="number"
+          min="0"
+          step="0.01"
+          value="0.9"
+        >
+      </label>
 
-    <label class="field">
-      Renderauflösung (DPI)
-      <input
-        id="dpi"
-        type="number"
-        min="36"
-        max="180"
-        step="1"
-        value="300"
-      >
-    </label>
+      <label class="field">
+        Renderauflösung (DPI)
+        <input
+          id="dpi"
+          type="number"
+          min="36"
+          max="600"
+          step="1"
+          value="300"
+        >
+      </label>
 
-    <button id="analyze" disabled>
-      Analysieren
-    </button>
+      <label class="field">
+        <span>
+          <input
+            id="colorSurchargeEnabled"
+            type="checkbox"
+          >
+          Farbtinte/Toner ist teurer als Schwarz - Aufschlag auf CMY (%)
+        </span>
 
-    <button id="csv" disabled>
-      CSV exportieren
-    </button>
+        <input
+          id="colorSurcharge"
+          type="number"
+          min="0"
+          step="0.1"
+          value="20.0"
+          aria-label="Farbaufschlag in Prozent"
+        >
+      </label>
 
-  </div>
+      <label class="field">
+        Kopfreinigung – Aufschlag auf alle Farben (%)
+        <input
+          id="cleaningSurcharge"
+          type="number"
+          min="0"
+          step="0.1"
+          value="4.0"
+        >
+      </label>
 
-  <div id="status" class="status"></div>
-  <progress id="progress" hidden></progress>
-</section>
+      <button id="analyze" disabled>
+        Analysieren
+      </button>
 
-<section class="card">
-  <div class="table-wrap">
+      <button id="csv" disabled>
+        CSV exportieren
+      </button>
 
-    <table id="results">
-      <thead>
-        <tr>
-          <th>Seite</th>
-          <th>Format</th>
-          <th>A4-Faktor</th>
-          <th>Cyan</th>
-          <th>Magenta</th>
-          <th>Yellow</th>
-          <th>Black</th>
-          <th>Gesamt</th>
-          <th>Kosten (Euro)</th>
-        </tr>
-      </thead>
+    </div>
 
-      <tbody></tbody>
-      <tfoot></tfoot>
-    </table>
+    <div id="status" class="status"></div>
+    <progress id="progress" hidden></progress>
+  </section>
 
-  </div>
-</section>
+  <section class="card">
+    <div class="table-wrap">
 
-<script>
-const fileEl = document.querySelector("#file");
-const analyzeBtn = document.querySelector("#analyze");
-const csvBtn = document.querySelector("#csv");
-const statusEl = document.querySelector("#status");
-const progress = document.querySelector("#progress");
-const tbody = document.querySelector("#results tbody");
-const tfoot = document.querySelector("#results tfoot");
+      <table id="results">
+        <thead>
+          <tr>
+            <th>Seite</th>
+            <th>Format</th>
+            <th>A4-Faktor</th>
+            <th>Cyan</th>
+            <th>Magenta</th>
+            <th>Yellow</th>
+            <th>Black</th>
+            <th>Gesamt</th>
+            <th>Kosten (Euro)</th>
+          </tr>
+        </thead>
 
-let selected = null;
-let rows = [];
+        <tbody></tbody>
+        <tfoot></tfoot>
+      </table>
 
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    </div>
+  </section>
 
-fileEl.onchange = () => {
-  selected = fileEl.files[0];
-  analyzeBtn.disabled = !selected;
-  csvBtn.disabled = true;
+  <script>
+    const fileEl = document.querySelector("#file");
+    const basePriceEl = document.querySelector("#basePrice");
+    const dpiEl = document.querySelector("#dpi");
+    const colorSurchargeEnabledEl =
+      document.querySelector("#colorSurchargeEnabled");
+    const colorSurchargeEl =
+      document.querySelector("#colorSurcharge");
+    const cleaningSurchargeEl =
+      document.querySelector("#cleaningSurcharge");
 
-  statusEl.textContent = selected
-    ? `${selected.name} ausgewählt.`
-    : "";
-};
+    const analyzeBtn =
+      document.querySelector("#analyze");
+    const csvBtn =
+      document.querySelector("#csv");
+    const statusEl =
+      document.querySelector("#status");
+    const progress =
+      document.querySelector("#progress");
+    const tbody =
+      document.querySelector("#results tbody");
+    const tfoot =
+      document.querySelector("#results tfoot");
 
-const fmt = number =>
-  number.toLocaleString("de-DE", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+    let selectedFile = null;
+    let rows = [];
 
-function rgbToCmyk(r, g, b) {
-  r /= 255;
-  g /= 255;
-  b /= 255;
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-  const k = 1 - Math.max(r, g, b);
+    fileEl.addEventListener("change", () => {
+      selectedFile = fileEl.files[0] || null;
+      analyzeBtn.disabled = !selectedFile;
+      csvBtn.disabled = true;
+      rows = [];
+      renderResults();
 
-  if (k >= 0.999999) {
-    return [0, 0, 0, 1];
-  }
+      statusEl.textContent = selectedFile
+        ? `${selectedFile.name} ausgewählt.`
+        : "";
+    });
 
-  return [
-    (1 - r - k) / (1 - k),
-    (1 - g - k) / (1 - k),
-    (1 - b - k) / (1 - k),
-    k
-  ];
-}
-
-async function analyzePage(page, dpi) {
-  const base = page.getViewport({ scale: 1 });
-  const scale = dpi / 72;
-  const viewport = page.getViewport({ scale });
-
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d", {
-    willReadFrequently: true
-  });
-
-  canvas.width = Math.ceil(viewport.width);
-  canvas.height = Math.ceil(viewport.height);
-
-  await page.render({
-    canvasContext: context,
-    viewport: viewport
-  }).promise;
-
-  const imageData = context.getImageData(
-    0,
-    0,
-    canvas.width,
-    canvas.height
-  ).data;
-
-  const sums = [0, 0, 0, 0];
-
-  for (let i = 0; i < imageData.length; i += 4) {
-    const [C, M, Y, K] = rgbToCmyk(
-      imageData[i],
-      imageData[i + 1],
-      imageData[i + 2]
-    );
-
-    sums[0] += C;
-    sums[1] += M;
-    sums[2] += Y;
-    sums[3] += K;
-  }
-
-  const pixelCount = canvas.width * canvas.height;
-
-  const coverage = sums.map(value =>
-    value / pixelCount * 100
-  );
-
-  const totalCoverage = coverage.reduce(
-    (sum, value) => sum + value,
-    0
-  );
-
-  const a4Factor =
-    (base.width * base.height) /
-    (595.2755906 * 841.8897638);
-
-  const basePriceCent =
-    Number(document.querySelector("#basePrice").value);
-
-  const costCent =
-    totalCoverage / 5 *
-    basePriceCent *
-    a4Factor;
-
-  return {
-    format:
-      `${fmt(base.width / 72 * 25.4)}×` +
-      `${fmt(base.height / 72 * 25.4)} mm`,
-
-    factor: a4Factor,
-    coverage: coverage,
-    total: totalCoverage,
-    costCent: costCent
-  };
-}
-
-function renderResults() {
-  tbody.innerHTML = rows.map(row => `
-    <tr>
-      <td>${row.page}</td>
-      <td>${row.format}</td>
-      <td>${fmt(row.factor)}</td>
-      ${row.coverage.map(value =>
-        `<td>${fmt(value)}%</td>`
-      ).join("")}
-      <td class="total">${fmt(row.total)}%</td>
-      <td>${fmt(row.costCent / 100)} €</td>
-    </tr>
-  `).join("");
-
-  const totalCent = rows.reduce(
-    (sum, row) => sum + row.costCent,
-    0
-  );
-
-  tfoot.innerHTML = rows.length
-    ? `
-      <tr class="total">
-        <td colspan="8">Gesamtkosten</td>
-        <td>${fmt(totalCent / 100)} €</td>
-      </tr>
-    `
-    : "";
-}
-
-analyzeBtn.onclick = async () => {
-  try {
-    analyzeBtn.disabled = true;
-    csvBtn.disabled = true;
-    rows = [];
-    renderResults();
-
-    progress.hidden = false;
-    progress.value = 0;
-
-    const pdf = await pdfjsLib.getDocument({
-      data: await selected.arrayBuffer()
-    }).promise;
-
-    for (
-      let pageNumber = 1;
-      pageNumber <= pdf.numPages;
-      pageNumber++
-    ) {
-      statusEl.textContent =
-        `Seite ${pageNumber} von ${pdf.numPages} wird analysiert …`;
-
-      const page = await pdf.getPage(pageNumber);
-
-      const result = await analyzePage(
-        page,
-        Number(document.querySelector("#dpi").value)
-      );
-
-      rows.push({
-        page: pageNumber,
-        ...result
+    const fmt = number =>
+      Number(number).toLocaleString("de-DE", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
       });
 
-      progress.value = pageNumber / pdf.numPages;
-      renderResults();
+    function rgbToCmyk(r, g, b) {
+      r /= 255;
+      g /= 255;
+      b /= 255;
+
+      const k = 1 - Math.max(r, g, b);
+
+      if (k >= 0.999999) {
+        return [0, 0, 0, 1];
+      }
+
+      return [
+        (1 - r - k) / (1 - k),
+        (1 - g - k) / (1 - k),
+        (1 - b - k) / (1 - k),
+        k
+      ];
     }
 
-    statusEl.textContent =
-      `Fertig: ${pdf.numPages} Seite(n).`;
+    async function analyzePage(page, dpi) {
+      const baseViewport =
+        page.getViewport({ scale: 1 });
 
-    csvBtn.disabled = false;
+      const viewport =
+        page.getViewport({ scale: dpi / 72 });
 
-  } catch (error) {
-    statusEl.textContent =
-      "Fehler: " + error.message;
+      const canvas =
+        document.createElement("canvas");
 
-  } finally {
-    analyzeBtn.disabled = false;
-    progress.hidden = true;
-  }
-};
+      const context =
+        canvas.getContext("2d", {
+          willReadFrequently: true
+        });
 
-csvBtn.onclick = () => {
-  const header = [
-    "Seite",
-    "Format",
-    "A4-Faktor",
-    "Cyan %",
-    "Magenta %",
-    "Yellow %",
-    "Black %",
-    "Gesamt %",
-    "Kosten Euro"
-  ];
+      canvas.width =
+        Math.ceil(viewport.width);
 
-  const documentTotalEuro = rows.reduce(
-    (sum, row) => sum + row.costCent / 100,
-    0
-  );
+      canvas.height =
+        Math.ceil(viewport.height);
 
-  const lines = [
-    header,
+      await page.render({
+        canvasContext: context,
+        viewport
+      }).promise;
 
-    ...rows.map(row => [
-      row.page,
-      row.format,
-      fmt(row.factor),
-      ...row.coverage.map(fmt),
-      fmt(row.total),
-      fmt(row.costCent / 100)
-    ]),
+      const imageData =
+        context.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        ).data;
 
-    [
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "Gesamtpreis Dokument",
-      fmt(documentTotalEuro)
-    ]
-  ].map(values => values.join(";"));
+      const channelSums = [0, 0, 0, 0];
 
-  const blob = new Blob(
-    ["\ufeff" + lines.join("\r\n")],
-    {
-      type: "text/csv;charset=utf-8"
+      for (
+        let index = 0;
+        index < imageData.length;
+        index += 4
+      ) {
+        const [cyan, magenta, yellow, black] =
+          rgbToCmyk(
+            imageData[index],
+            imageData[index + 1],
+            imageData[index + 2]
+          );
+
+        channelSums[0] += cyan;
+        channelSums[1] += magenta;
+        channelSums[2] += yellow;
+        channelSums[3] += black;
+      }
+
+      const pixelCount =
+        canvas.width * canvas.height;
+
+      const coverage = channelSums.map(
+        sum => sum / pixelCount * 100
+      );
+
+      const totalCoverage =
+        coverage.reduce(
+          (sum, value) => sum + value,
+          0
+        );
+
+      const a4Factor =
+        (baseViewport.width * baseViewport.height) /
+        (595.2755906 * 841.8897638);
+
+      const colorSurchargeFactor =
+        colorSurchargeEnabledEl.checked
+          ? 1 + Number(colorSurchargeEl.value) / 100
+          : 1;
+
+      const cleaningSurchargeFactor =
+        1 + Number(cleaningSurchargeEl.value) / 100;
+
+      const adjustedCoverage = (
+        coverage[0] * colorSurchargeFactor +
+        coverage[1] * colorSurchargeFactor +
+        coverage[2] * colorSurchargeFactor +
+        coverage[3]
+      ) * cleaningSurchargeFactor;
+
+      const basePriceCent =
+        Number(basePriceEl.value);
+
+      const costCent =
+        adjustedCoverage / 5 *
+        basePriceCent *
+        a4Factor;
+
+      return {
+        format:
+          `${fmt(baseViewport.width / 72 * 25.4)} × ` +
+          `${fmt(baseViewport.height / 72 * 25.4)} mm`,
+
+        a4Factor,
+        coverage,
+        totalCoverage,
+        adjustedCoverage,
+        costCent
+      };
     }
-  );
 
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "druckkosten.csv";
-  link.click();
+    function renderResults() {
+      tbody.innerHTML = rows.map(row => `
+        <tr>
+          <td>${row.page}</td>
+          <td>${row.format}</td>
+          <td>${fmt(row.a4Factor)}</td>
 
-  URL.revokeObjectURL(link.href);
-};
-</script>
+          ${row.coverage.map(value => `
+            <td>${fmt(value)}%</td>
+          `).join("")}
+
+          <td class="total">
+            ${fmt(row.totalCoverage)}%
+          </td>
+
+          <td>
+            ${fmt(row.costCent / 100)} €
+          </td>
+        </tr>
+      `).join("");
+
+      const totalCostCent =
+        rows.reduce(
+          (sum, row) => sum + row.costCent,
+          0
+        );
+
+      tfoot.innerHTML = rows.length
+        ? `
+          <tr class="total">
+            <td colspan="8">Gesamtkosten</td>
+            <td>${fmt(totalCostCent / 100)} €</td>
+          </tr>
+        `
+        : "";
+    }
+
+    analyzeBtn.addEventListener("click", async () => {
+      try {
+        analyzeBtn.disabled = true;
+        csvBtn.disabled = true;
+        rows = [];
+        renderResults();
+
+        progress.hidden = false;
+        progress.value = 0;
+
+        const pdf =
+          await pdfjsLib.getDocument({
+            data: await selectedFile.arrayBuffer()
+          }).promise;
+
+        for (
+          let pageNumber = 1;
+          pageNumber <= pdf.numPages;
+          pageNumber++
+        ) {
+          statusEl.textContent =
+            `Seite ${pageNumber} von ` +
+            `${pdf.numPages} wird analysiert …`;
+
+          const page =
+            await pdf.getPage(pageNumber);
+
+          const result =
+            await analyzePage(
+              page,
+              Number(dpiEl.value)
+            );
+
+          rows.push({
+            page: pageNumber,
+            ...result
+          });
+
+          progress.value =
+            pageNumber / pdf.numPages;
+
+          renderResults();
+        }
+
+        statusEl.textContent =
+          `Fertig: ${pdf.numPages} Seite(n).`;
+
+        csvBtn.disabled = false;
+
+      } catch (error) {
+        statusEl.textContent =
+          "Fehler: " + error.message;
+
+      } finally {
+        analyzeBtn.disabled = false;
+        progress.hidden = true;
+      }
+    });
+
+    csvBtn.addEventListener("click", () => {
+      const header = [
+        "Seite",
+        "Format",
+        "A4-Faktor",
+        "Cyan %",
+        "Magenta %",
+        "Yellow %",
+        "Black %",
+        "Gesamt %",
+        "Kosten Euro"
+      ];
+
+      const documentTotalEuro =
+        rows.reduce(
+          (sum, row) => sum + row.costCent / 100,
+          0
+        );
+
+      const csvRows = [
+        header,
+
+        ...rows.map(row => [
+          row.page,
+          row.format,
+          fmt(row.a4Factor),
+          ...row.coverage.map(fmt),
+          fmt(row.totalCoverage),
+          fmt(row.costCent / 100)
+        ]),
+
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "Gesamtpreis Dokument",
+          fmt(documentTotalEuro)
+        ]
+      ];
+
+      const csvContent =
+        csvRows
+          .map(row => row.join(";"))
+          .join("\r\n");
+
+      const blob = new Blob(
+        ["\ufeff" + csvContent],
+        {
+          type: "text/csv;charset=utf-8"
+        }
+      );
+
+      const link =
+        document.createElement("a");
+
+      const url =
+        URL.createObjectURL(blob);
+
+      link.href = url;
+      link.download = "druckkosten.csv";
+      link.click();
+
+      URL.revokeObjectURL(url);
+    });
+  </script>
 
 </body>
 </html>
