@@ -90,6 +90,10 @@ erforderlich:
 - Berücksichtigung von Transparenzen, Überdrucken und Sonderfarben.
 - Abstimmung mit dem konkreten Druckverfahren und Druckdienstleister.
 
+## Änderungen in Beta3
+- Neue Funktion für abweichenden Farbtintenpreis (optional)
+- Kalkulation von Druckkopf-Reinigungskosten des Druckers (optional)
+
 ---
 
 # English Version
@@ -176,4 +180,9 @@ Production-grade analysis would require, among other things:
 - Handling of transparency, overprinting and spot colors.
 - Consideration of the actual printing process and service provider.
 
+## Changes in Beta3
+- New feature for different color ink prices (optional)
+- Calculation of printer printhead cleaning costs (optional)
+
 ---
+
